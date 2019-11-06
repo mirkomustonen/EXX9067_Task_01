@@ -1,0 +1,87 @@
+---
+title: "Read and clean nitrogen and sulfate data"
+output: html_notebook
+---
+
+# Task 1
+
+Create a function that takes as input the path to a single .csv file in the specdata folder and creates a data table from its contents. The data types in the output table have to match the data (date is understood as a date).
+
+## Task 1 solution
+
+To write this function I will use the *read.table*. You can find some documentation for *read.table* here: https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.table.html. Because the data is in *.csv* format
+*read.csv* would also work. I used *read.table* because this would work for other types similar data also. 
+
+For testing I added two lines of code that run the function and output first lines of the read data.
+
+```{r Function to read data}
+# In general the syntax of functions in R is: 
+# FunctionName <- function(input){
+#       output <- dosomething_to/with_input
+#       return(output)
+#}
+DataRead <- function(path_to){
+        data_tab <- read.table(file = path_to, header = TRUE, sep = ',', 
+                               colClasses = c('Date', 'numeric', 
+                                              'numeric', 'factor'))
+        return(data_tab)
+}
+
+data_i <- DataRead('specdata/002.csv')  # This line runs the function and saves the output as data_i
+head(data_i) # head(dataframe) outputs first lines of a dataframe. If you want the last lines use tail(dataframe)
+```
+
+
+# Task 2
+
+Write a for loop that loops through all the file paths in the specdata 
+folder and uses the function written in previous task to read the data from 
+the .csv files. Create a table with columns with: 
+
+1. ID numbers 
+2. the number of rows in each of the read files
+3. The number of rows where at least sulfate or nitrate data is not missing.
+
+## Task 2 solution
+
+First list all I compose a list of all file names in the *specdata* folder.
+```{r List file names}
+file_names <- list.files('specdata', full.names = TRUE) # full.names = TRUE list the full path name of files
+head(file_names)  # Output first file names in the list
+```
+
+The following code is explained with comments before or after each line of code.
+
+```{r}
+k <- 0
+for (file_i in file_names) {        # loop through all the file paths
+        data_i <- DataRead(file_i)  # Read data from a single file
+        ID <- data_i$ID[1]          # Make variable called ID with the name of the ID from file
+        no_data_rows <- nrow(data_i)  # Get the number of rows in the read in data table
+        # Make a vector of logical where value is TRUE when sulfate value not NA
+        no_rows_not_NA_sulf <- !is.na(data_i$sulfate)
+        # Make a vector of logical where value is TRUE when nitrate value not NA
+        no_rows_not_NA_nitr <- !is.na(data_i$nitrate)
+        # Make a vector of logical where value is TRUE when either sulfate or nitrate value not NA
+        no_rows_not_NA <- no_rows_not_NA_sulf | no_rows_not_NA_nitr
+        # Subset the table to have only rows with atleast sulfate or nitrate value available
+        data_not_NA <- data_i[no_rows_not_NA,]
+        # Get the number of rows in the the table with atleast sulfate or nitrate value available
+        no_rows_not_NA <- nrow(data_not_NA)
+        
+        # Compose the output table
+        out_tab_i <- data.frame(ID, no_data_rows, no_rows_not_NA)
+        
+        if (k == 0) {  # k equals 0 in during the first iteration only
+                # During first iteration assign out_tab the value of the first out_tab_i
+                out_tab <- out_tab_i
+                # Changing the value of k prohibits the program entering the previous lines
+                k <- 1  
+        }else{
+                # During second iteration and the following iterations add lines to the output table
+                out_tab <- rbind(out_tab, out_tab_i)
+        }
+}
+
+head(out_tab)  # show first lines of the output table
+```
