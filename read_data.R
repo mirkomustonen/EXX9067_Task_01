@@ -5,9 +5,11 @@
 
 path_to <- 'specdata/002.csv'
 
-data_read_i <- function(path_to){
+DataRead <- function(path_to){
         data_tab <- read.table(file = path_to, header = T, sep = ',', 
-                               colClasses = c('Date', 'numeric', 'numeric', 'factor'))        
+                               colClasses = c('Date', 'numeric', 
+                                              'numeric', 'factor'))
+        return(data_tab)
 }
 
 # Write a for loop that loops through all the file paths in the specdata 
@@ -19,8 +21,8 @@ data_read_i <- function(path_to){
 file_names <- list.files('specdata', full.names = TRUE)
 
 k <- 0
-for(file_i in file_names){
-        data_i <- data_read_i(file_i)
+for (file_i in file_names) {
+        data_i <- DataRead(file_i)
         ID <- data_i$ID[1]
         No_data_rows <- nrow(data_i)
         No_rows_not_NA_sulf <- !is.na(data_i$sulfate)
@@ -31,7 +33,7 @@ for(file_i in file_names){
         No_rows_not_NA <- nrow(data_not_NA)
         
         out_tab_i <- data.frame(ID, No_data_rows, No_rows_not_NA)
-        if(k == 0){
+        if (k == 0) {
                 out_tab <- out_tab_i
                 k <- 1
         }else{

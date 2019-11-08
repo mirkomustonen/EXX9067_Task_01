@@ -1,6 +1,9 @@
 ---
 title: "Read and clean nitrogen and sulfate data"
-output: html_notebook
+author: Mirko Mustonen
+date: 6. November 2019
+output:
+  html_notebook: default
 ---
 
 # Task 1
